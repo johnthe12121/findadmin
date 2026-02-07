@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Profile - Everguard Technologies</title>
+    <style>
+        :root{
+            --bg:#f6f8fb;
+            --card:#ffffff;
+            --muted:#6b7280;
+            --accent:#0b73ff;
+            --error:#dc2626;
+            --success:#10b981;
+        }
+        body{font-family:Inter,ui-sans-serif,system-ui;margin:0;padding:0;background:var(--bg);min-height:100vh;}
+        .container{max-width:1000px;margin:0 auto;padding:20px;}
+        .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;flex-wrap:wrap;gap:15px;}
+        .card{background:var(--card);border-radius:12px;box-shadow:0 6px 22px rgba(16,24,40,0.06);padding:30px;margin-bottom:20px;}
+        .error{color:var(--error);text-align:center;padding:20px;}
+        .success{color:var(--success);background:#ecfdf5;padding:12px;border-radius:6px;border:1px solid #a7f3d0;margin-bottom:20px;}
+        .profile-section{display:grid;grid-template-columns:1fr 1fr;gap:30px;}
+        @media(max-width:768px){.profile-section{grid-template-columns:1fr;}}
+        .user-avatar{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#6ec1ff);display:flex;align-items:center;justify-content:center;color:white;font-size:48px;font-weight:bold;margin:0 auto 20px;}
+        .security-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#f3f4f6;border-radius:20px;font-size:13px;}
+        .security-badge.admin{background:#fee2e2;color:#dc2626;}
+        .security-badge.user{background:#dbeafe;color:#1d4ed8;}
+        .activity-log{background:#f9fafb;border-radius:8px;padding:15px;margin-top:20px;}
+        .activity-item{border-bottom:1px solid #e5e7eb;padding:10px 0;}
+        .activity-item:last-child{border-bottom:none;}
+        .activity-time{color:var(--muted);font-size:12px;}
+        .info-group{margin-bottom:15px;}
+        .info-group label{display:block;color:var(--muted);font-size:14px;margin-bottom:5px;font-weight:500;}
+        .info-value{padding:10px;background:#f9fafb;border-radius:6px;border:1px solid #e5e7eb;font-size:14px;}
+        .info-value.password{display:flex;align-items:center;gap:10px;}
+        .password-display{flex:1;padding:10px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;font-family:monospace;font-size:14px;}
+        .password-display[type="password"]{letter-spacing:2px;}
+        .eye-btn{padding:8px 15px;background:var(--accent);color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;}
+        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-top:20px;}
+        .stat-item{text-align:center;padding:15px;background:#f9fafb;border-radius:8px;}
+        .stat-value{font-size:24px;font-weight:bold;color:#111;}
+        .stat-label{font-size:12px;color:var(--muted);margin-top:5px;}
+        .btn{padding:10px 20px;background:var(--accent);color:white;border:none;border-radius:6px;cursor:pointer;text-decoration:none;display:inline-block;font-weight:600;}
+        .logout-btn{background:#dc2626;}
+        .edit-btn{background:#10b981;}
+        .secondary-btn{background:#f3f4f6;color:#374151;}
+        .nav-links{display:flex;gap:10px;flex-wrap:wrap;}
+        .tabs{display:flex;border-bottom:1px solid #e5e7eb;margin-bottom:20px;}
+        .tab{padding:12px 20px;cursor:pointer;border-bottom:2px solid transparent;}
+        .tab.active{border-bottom-color:var(--accent);color:var(--accent);font-weight:600;}
+        .tab-content{display:none;}
+        .tab-content.active{display:block;}
+        .hint-box{background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:15px;margin-top:20px;font-size:13px;display:none;}
+        .hint-box.visible{display:block;}
+        .hint-title{color:#92400e;font-weight:600;margin-bottom:8px;}
+        .debug-info{background:#f3f4f6;padding:10px;border-radius:6px;font-family:monospace;font-size:12px;margin-top:10px;color:var(--muted);}
+        .access-level{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:4px;font-size:12px;font-weight:500;}
+        .access-level.admin{background:#fee2e2;color:#dc2626;}
+        .access-level.user{background:#dbeafe;color:#1d4ed8;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1 style="margin:0;">User Dashboard</h1>
+                <p style="margin:5px 0 0;color:var(--muted);font-size:14px;">
+                    Welcome back, {{ session.username }}
+                    <span class="access-level {{ session.role }}">{{ session.role|upper }}</span>
+                </p>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="btn secondary-btn">🏠 Home</a>
+                <a href="#" class="btn edit-btn" onclick="showEditProfile()">✏️ Edit Profile</a>
+                <a href="/logout" class="btn logout-btn">🚪 Logout</a>
+            </div>
+        </div>
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% else %}
+            {% if message %}
+                <div class="success">{{ message }}</div>
+            {% endif %}
+
+            <div class="tabs" id="profileTabs">
+                <div class="tab active" onclick="switchTab('overview')">📊 Overview</div>
+                <div class="tab" onclick="switchTab('security')">🔒 Security</div>
+                <div class="tab" onclick="switchTab('activity')">📝 Activity</div>
+            </div>
+
+            <!-- Overview Tab -->
+            <div id="overview" class="tab-content active">
+                <div class="profile-section">
+                    <div class="card">
+                        <div class="user-avatar">
+                            {{ user_data.username[0:2]|upper }}
+                        </div>
+                        <h2 style="text-align:center;margin-bottom:5px;">{{ user_data.username }}</h2>
+                        <p style="text-align:center;color:var(--muted);margin-bottom:20px;">{{ user_data.email }}</p>
+
+                        <div style="text-align:center;margin-bottom:20px;">
+                            <span class="security-badge {{ user_data.role }}">
+                                {% if user_data.role == 'admin' %}⚡{% else %}👤{% endif %}
+                                {{ user_data.role|capitalize }} Account
+                            </span>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-value">{% if user_data.role == 'admin' %}15{% else %}3{% endif %}</div>
+                                <div class="stat-label">Projects</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">{% if user_data.role == 'admin' %}42{% else %}7{% endif %}</div>
+                                <div class="stat-label">Logins</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">{% if user_data.role == 'admin' %}99%{% else %}85%{% endif %}</div>
+                                <div class="stat-label">Security Score</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">
+                                    {% if user_data.role == 'admin' %}
+                                        <span style="color:var(--success)">★</span>
+                                    {% else %}
+                                        <span style="color:var(--muted)">☆</span>
+                                    {% endif %}
+                                </div>
+                                <div class="stat-label">Premium</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="margin-top:0;">Account Information</h3>
+
+                        <div class="info-group">
+                            <label><span style="color:var(--accent)">👤</span> Username</label>
+                            <div class="info-value">{{ user_data.username }}</div>
+                        </div>
+
+                        <div class="info-group">
+                            <label><span style="color:var(--accent)">✉️</span> Email Address</label>
+                            <div class="info-value">{{ user_data.email }}</div>
+                        </div>
+
+                        <div class="info-group">
+                            <label><span style="color:var(--accent)">🔑</span> Account Type</label>
+                            <div class="info-value">
+                                {% if user_data.role == 'admin' %}
+                                    Administrator - Full System Access
+                                {% else %}
+                                    Standard User - Limited Access
+                                {% endif %}
+                            </div>
+                        </div>
+
+
+
+                        <div class="info-group">
+                            <label><span style="color:var(--accent)">🔐</span> Password Verification</label>
+                            <div class="info-value password">
+                                <input type="password" id="passwordField" class="password-display"
+                                       value="{{ user_data.password }}" readonly>
+                                <button type="button" class="eye-btn" onclick="togglePassword()" id="toggleBtn">
+                                    👁 Show
+                                </button>
+                            </div>
+                            <small style="color:var(--muted);display:block;margin-top:5px;">
+                                Click "Show" to verify your password
+                            </small>
+                        </div>
+
+                        {% if not is_own_profile %}
+
+                        {% endif %}
+                    </div>
+                </div>
+
+
+            </div>
+
+            <!-- Security Tab -->
+            <div id="security" class="tab-content">
+                <div class="card">
+                    <h3>Security Settings</h3>
+                    <p style="color:var(--muted);margin-bottom:20px;">
+                        Manage your account security preferences and authentication methods.
+                    </p>
+
+                    <div class="info-group">
+                        <label>Two-Factor Authentication</label>
+                        <div class="info-value">
+                            {% if user_data.role == 'admin' %}
+                                ✅ Enabled (Required for administrators)
+                            {% else %}
+                                ⚠️ Recommended but not enabled
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="info-group">
+                        <label>Last Password Change</label>
+                        <div class="info-value">
+                            {% if user_data.role == 'admin' %}
+                                30 days ago
+                            {% else %}
+                                Never changed
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="info-group">
+                        <label>Session Management</label>
+                        <div class="info-value">
+                            Active sessions: {% if user_data.role == 'admin' %}3{% else %}1{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Tab -->
+            <div id="activity" class="tab-content">
+                <div class="card">
+                    <h3>Recent Activity</h3>
+                    <div class="activity-log">
+                        {% if user_data.role == 'admin' %}
+                            <div class="activity-item">
+                                <strong>System Audit</strong> - Reviewed security logs
+                                <div class="activity-time">Today, 14:30</div>
+                            </div>
+                            <div class="activity-item">
+
+                                <div class="activity-time">Today, 11:15</div>
+                            </div>
+                            <div class="activity-item">
+                                <strong>Login</strong> - From IP: 192.168.1.100
+                                <div class="activity-time">Yesterday, 09:45</div>
+                            </div>
+                        {% else %}
+                            <div class="activity-item">
+                                <strong>Profile Update</strong> - Changed email preferences
+                                <div class="activity-time">Today, 10:30</div>
+                            </div>
+                            <div class="activity-item">
+                                <strong>Login</strong> - From IP: 192.168.1.150
+                                <div class="activity-time">Yesterday, 14:20</div>
+                            </div>
+                            <div class="activity-item">
+                                <strong>Account Created</strong> - Welcome to Everguard
+                                <div class="activity-time">1 week ago</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hidden Hint Box -->
+            <div id="hintBox" class="hint-box">
+                <div class="hint-title">Debug Information</div>
+                <p>This profile is loaded using URL parameter: <code>profile_id={{ encoded_id }}</code></p>
+                <p>Decoded value: <code>{{ user_data.id }}</code></p>
+                <p>Try accessing other profiles by modifying the base64 encoded ID in the URL.</p>
+
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+
+            // Activate clicked tab
+            event.target.classList.add('active');
+        }
+
+        function togglePassword() {
+            const passwordField = document.getElementById('passwordField');
+            const toggleBtn = document.getElementById('toggleBtn');
+
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleBtn.innerHTML = '🙈 Hide';
+                toggleBtn.style.background = '#dc2626';
+            } else {
+                passwordField.type = 'password';
+                toggleBtn.innerHTML = '👁 Show';
+                toggleBtn.style.background = '';
+            }
+        }
+
+        function showHint() {
+            const hintBox = document.getElementById('hintBox');
+            hintBox.classList.toggle('visible');
+        }
+
+        function copyUserId() {
+            const userId = "{{ user_data.id }}";
+            navigator.clipboard.writeText(userId).then(() => {
+                alert('User ID copied to clipboard: ' + userId);
+            });
+        }
+
+        function showEditProfile() {
+            alert('Edit profile functionality is disabled in read-only view.');
+        }
+
+        function viewProfileSource() {
+            const encodedId = "{{ encoded_id }}";
+            const baseUrl = window.location.origin;
+            const url = `${baseUrl}/profile?profile_id=${encodedId}`;
+            alert('Current profile URL:\n' + url + '\n\nTry changing the profile_id parameter.');
+        }
+
+        // Auto-hide hint after 10 seconds
+        setTimeout(() => {
+            document.getElementById('hintBox').classList.remove('visible');
+        }, 10000);
+    </script>
+</body>
+</html>

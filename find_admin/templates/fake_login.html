@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Admin Login</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <style>
+      :root{
+        --bg: #f4f6fb;
+        --card: #ffffff;
+        --muted: #6b7280;
+        --accent: #0b73ff;
+        --danger: #ef4444;
+        --radius: 12px;
+        --maxw: 420px;
+      }
+      html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;}
+      body{
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background:linear-gradient(180deg,var(--bg),#ffffff);
+        padding:24px;
+      }
+      .wrap{
+        width:100%;
+        max-width:var(--maxw);
+      }
+      .card{
+        background:var(--card);
+        border-radius:var(--radius);
+        box-shadow:0 10px 30px rgba(15,23,42,0.08);
+        padding:28px;
+        border:1px solid rgba(11,115,255,0.04);
+      }
+      .brand{
+        display:flex;
+        gap:12px;
+        align-items:center;
+        margin-bottom:16px;
+      }
+      .logo{
+        width:48px;height:48px;border-radius:10px;
+        display:flex;align-items:center;justify-content:center;
+        font-weight:800;color:white;background:linear-gradient(135deg,var(--accent),#6ec1ff);
+        font-family:monospace;
+      }
+      h1{margin:0;font-size:20px;letter-spacing:-0.01em;}
+      p.lead{margin:6px 0 18px;color:var(--muted);font-size:14px}
+      label{display:block;font-size:13px;color:#111;margin-bottom:8px}
+      input[type="text"], input[type="password"]{
+        width:100%;
+        box-sizing:border-box;
+        padding:10px 12px;
+        border-radius:8px;
+        border:1px solid #e6e9ef;
+        background:#fbfdff;
+        margin-bottom:12px;
+        font-size:14px;
+      }
+      .row{display:flex;gap:8px;align-items:center;}
+      .btn{
+        display:inline-block;
+        background:var(--accent);
+        color:#fff;
+        padding:10px 14px;
+        border-radius:10px;
+        text-decoration:none;
+        font-weight:700;
+        border:0;
+        cursor:pointer;
+        font-size:14px;
+      }
+      .muted{color:var(--muted);font-size:13px}
+      .error{color:var(--danger);font-weight:700;margin-bottom:12px}
+      .hint{margin-top:12px;font-size:12px;color:var(--muted)}
+      footer{margin-top:14px;text-align:center;font-size:12px;color:var(--muted)}
+      @media (max-width:420px){
+        .card{padding:20px}
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrap">
+      <div class="card" role="main" aria-labelledby="admin-title">
+        <div class="brand">
+          <div class="logo">ADM</div>
+          <div>
+            <h1 id="admin-title">Admin Login</h1>
+            <div class="muted" style="margin-top:4px">Restricted access — sign in to continue</div>
+          </div>
+        </div>
+
+        {% if error %}
+          <div class="error" role="alert">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="/admin/login" autocomplete="off" novalidate>
+          <label for="username">Username</label>
+          <input id="username" name="username" type="text" inputmode="text" required placeholder="admin">
+
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" required placeholder="••••••••">
+
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+            <div class="muted" style="font-size:13px">Not your workstation?</div>
+            <button class="btn" type="submit">Sign in</button>
+          </div>
+        </form>
+
+        <div class="hint" aria-hidden="true">
+          If you don't have an account, contact the site administrator.
+        </div>
+
+    s
+      </div>
+    </div>
+  </body>
+</html>

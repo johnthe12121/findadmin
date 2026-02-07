@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Admin Panel</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      :root{
+        --bg: #f5f7fb;
+        --card: #ffffff;
+        --muted: #6b7280;
+        --accent: #0b73ff;
+        --radius: 12px;
+        --shadow: 0 10px 30px rgba(15,23,42,0.06);
+        --container: 980px;
+      }
+      html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;}
+      body{background:linear-gradient(180deg,var(--bg),#ffffff);color:#0f172a;padding:28px;display:flex;justify-content:center;}
+      .wrap{width:100%;max-width:var(--container);}
+      header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+      .brand{display:flex;gap:12px;align-items:center}
+      .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#6ec1ff);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-family:monospace}
+      h1{font-size:20px;margin:0}
+      .muted{color:var(--muted);font-size:13px}
+      .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;border:1px solid rgba(11,115,255,0.04)}
+      .breadcrumb{font-size:13px;color:var(--muted);margin-bottom:12px}
+      .flag-box{
+        margin-top:10px;
+        display:flex;
+        gap:12px;
+        align-items:center;
+      }
+      .flag{
+        flex:1;
+        padding:14px 16px;
+        border-radius:10px;
+        background:#0f172a;
+        color:#e6f0ff;
+        font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+        font-weight:700;
+        font-size:16px;
+        overflow-x:auto;
+        white-space:nowrap;
+      }
+      .controls{display:flex;gap:8px}
+      .btn{
+        border:0;padding:10px 12px;border-radius:10px;font-weight:700;cursor:pointer;
+      }
+      .btn-primary{background:var(--accent);color:white}
+      .btn-ghost{background:transparent;border:1px solid rgba(15,23,42,0.06);color:#0f172a}
+      .meta{margin-top:12px;color:var(--muted);font-size:13px}
+      footer{text-align:center;margin-top:18px;color:var(--muted);font-size:13px}
+      @media (max-width:640px){
+        .flag{font-size:14px;padding:12px}
+        .controls{flex-direction:column}
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="brand">
+          <div class="logo">ADM</div>
+          <div>
+            <h1>Admin Panel</h1>
+            <div class="muted">Restricted access — administrators only</div>
+          </div>
+        </div>
+        <div>
+          <a class="btn btn-ghost" href="/" style="text-decoration:none;display:inline-block">← Back to site</a>
+        </div>
+      </header>
+
+      <main class="card" role="main" aria-labelledby="panel-title">
+        <div class="breadcrumb">Home / Admin</div>
+
+        <section aria-labelledby="panel-title">
+          <h2 id="panel-title" style="margin:0 0 6px">Welcome, admin</h2>
+          <p class="muted" style="margin:6px 0 12px">Below is the sensitive flag for this challenge. Treat it as confidential.</p>
+
+          <div class="flag-box" role="region" aria-label="flag">
+            <div class="flag" id="flag-text">{{ flag }}</div>
+
+            <div class="controls" aria-hidden="false">
+              <button class="btn btn-primary" id="copy-btn" type="button">Copy</button>
+              <button class="btn btn-ghost" id="reveal-btn" type="button" title="Reveal as plain text">Reveal</button>
+            </div>
+          </div>
+
+          <div class="meta">
+            <small>Tip: the flag is copyable. Use the <strong>Copy</strong> button or select the text manually.</small>
+          </div>
+        </section>
+      </main>
+
+    
+    </div>
+
+    <script>
+      (function(){
+        const flagEl = document.getElementById('flag-text');
+        const copyBtn = document.getElementById('copy-btn');
+        const revealBtn = document.getElementById('reveal-btn');
+
+        copyBtn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(flagEl.textContent.trim());
+            copyBtn.textContent = 'Copied';
+            setTimeout(()=> copyBtn.textContent = 'Copy', 1400);
+          } catch (e) {
+            // fallback: select text
+            const range = document.createRange();
+            range.selectNodeContents(flagEl);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+            document.execCommand('copy');
+            copyBtn.textContent = 'Copied';
+            setTimeout(()=> copyBtn.textContent = 'Copy', 1400);
+          }
+        });
+
+        // Toggle reveal — just a gentle UX touch
+        let revealed = true;
+        revealBtn.addEventListener('click', () => {
+          revealed = !revealed;
+          if (!revealed) {
+            flagEl.style.filter = 'blur(6px)';
+            revealBtn.textContent = 'Show';
+            copyBtn.disabled = true;
+          } else {
+            flagEl.style.filter = 'none';
+            revealBtn.textContent = 'Reveal';
+            copyBtn.disabled = false;
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>
